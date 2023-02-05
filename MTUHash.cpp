@@ -124,24 +124,75 @@ string performSubstitution(string expandedBlock){
   return substitute;
 }
 
-string* performESOperation(string* blocks, int numOfBlocks){
-  string* result = new string[numOfBlocks];
-  string expandedBlock, substitutedBlock;
-  cout << numOfBlocks << endl;
-  for(int i = 0; i < numOfBlocks; i++){
-    expandedBlock = performExpansion(blocks[i]);
-    substitutedBlock = performSubstitution(expandedBlock);
-    cout << expandedBlock << endl;
-    cout << substitutedBlock << endl;
+int getXOR(int a, int b){
+  if((a == 0 && b == 0) || (a == 1 && b == 1)){
+    return 0;
+  }
+  else{
+    return 1;
+  }
+}
+
+string calculateXOR(string block1, string block2){
+  if(block1.length() == 0){
+    return block2;
+  }
+  if(block2.length() == 0){
+    return block1;
+  }
+  string result = "";
+  for(int i = 0; i < 32; i++){
+    int bit1 = getBinaryValue(block1.at(i));
+    int bit2 = getBinaryValue(block2.at(i));
+    result += to_string(getXOR(bit1, bit2));
   }
   return result;
+}
+
+string calculateXORofOtherBlocks(string *blocks, int index, int numOfBlocks){
+  string XORResult = "";
+  for(int i = 0; i < numOfBlocks; i++){
+    if(i != index){
+      XORResult = calculateXOR(XORResult, blocks[i]);
+    }
+  }
+  return XORResult;
+}
+
+string* performESOperation(string* blocks, int numOfBlocks){
+  string* result = new string[numOfBlocks];
+  string expandedBlock;
+  for(int i = 0; i < numOfBlocks; i++){
+    expandedBlock = performExpansion(blocks[i]);
+    result[i] = performSubstitution(expandedBlock);
+  }
+  return result;
+}
+
+string calculateXORofAllBlocks(string *blocks, int numOfBlocks){
+  string XORResult = "";
+  for(int i = 0; i < numOfBlocks; i++){
+    XORResult = calculateXOR(XORResult, blocks[i]);
+  }
+  return XORResult;
+}
+
+string *performSingleRoundOperations(string* blocks, int numOfBlocks){
+  string* XORBlocks = new string[numOfBlocks];
+  string* ESBlocks = performESOperation(blocks, numOfBlocks);
+  for(int i = 0; i < numOfBlocks; i++){
+    XORBlocks[i] = calculateXORofOtherBlocks(ESBlocks, i, numOfBlocks);
+  }
+  return XORBlocks;
 }
 
 string MTUHash(string hashInput){
   int numOfBlocks = getNumberOfBlocks(hashInput);
   string* blocks = partitionBlocks(hashInput, numOfBlocks);
-  performESOperation(blocks, numOfBlocks);
-  return "";
+  string* outputBlocks = performSingleRoundOperations(blocks, numOfBlocks);
+  string result = calculateXORofAllBlocks(outputBlocks, numOfBlocks);
+  cout << result << endl;
+  return result;
 }
 
 int main(int argc, char** argv) {
