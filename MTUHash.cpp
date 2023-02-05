@@ -4,6 +4,8 @@
 using namespace std;
 
 string inputFileName = "Hashin.txt";
+string out1FileName = "Out1.txt";
+string outFinalFileName = "OutFinal.txt";
 int blockSize = 32;
 int expandedBlockSize = 48;
 int expansionTable[8][6] = {
@@ -111,6 +113,12 @@ string performExpansion(string currentBlock){
   return expandedBlock;
 }
 
+void writeFile(string fileName, string binary){
+  ofstream OutputFile(fileName);
+  OutputFile << binary;
+  OutputFile.close();
+}
+
 string performSubstitution(string expandedBlock){
   string substitute = "";
   string subBlock = "";
@@ -151,6 +159,9 @@ string calculateXOR(string block1, string block2){
 
 string calculateXORofOtherBlocks(string *blocks, int index, int numOfBlocks){
   string XORResult = "";
+  if(numOfBlocks == 1){
+    XORResult = blocks[0];
+  }
   for(int i = 0; i < numOfBlocks; i++){
     if(i != index){
       XORResult = calculateXOR(XORResult, blocks[i]);
@@ -189,9 +200,16 @@ string *performSingleRoundOperations(string* blocks, int numOfBlocks){
 string MTUHash(string hashInput){
   int numOfBlocks = getNumberOfBlocks(hashInput);
   string* blocks = partitionBlocks(hashInput, numOfBlocks);
-  string* outputBlocks = performSingleRoundOperations(blocks, numOfBlocks);
-  string result = calculateXORofAllBlocks(outputBlocks, numOfBlocks);
+  string result = "";
+  for(int i = 0; i < 16; i++){
+    blocks = performSingleRoundOperations(blocks, numOfBlocks);
+    if(i == 0){
+      writeFile(out1FileName, blocks[0]);
+    }
+  }
+  result = calculateXORofAllBlocks(blocks, numOfBlocks);
   cout << result << endl;
+  writeFile(outFinalFileName, result);
   return result;
 }
 
