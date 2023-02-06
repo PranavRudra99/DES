@@ -10,13 +10,13 @@ string MTUHash(string hashInput){
   int numOfBlocks = getNumberOfBlocks(hashInput);
   string* blocks = partitionBlocks(hashInput, numOfBlocks);
   string result = "";
-  for(int i = 0; i < 16; i++){
+  for(int i = 0; i < 15; i++){
     blocks = performSingleRoundOperations(blocks, numOfBlocks);
     if(i == 0){
       writeFile(out1FileName, blocks[0]);
     }
   }
-  result = calculateXORofAllBlocks(blocks, numOfBlocks);
+  result = performFinalRoundOperations(blocks, numOfBlocks);
   writeFile(outFinalFileName, result);
   return result;
 }

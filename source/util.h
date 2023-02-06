@@ -63,6 +63,14 @@ string getCorrespondingBinary(int val){
     }
 }
 
+void printBlocks(string* blocks, int numOfBlocks){
+  cout << endl;
+  for(int i = 0; i < numOfBlocks; i++){
+    cout << blocks[i] << endl;
+  }
+  cout << endl;
+}
+
 int getBinaryValue(char binary){
   if(binary == '1'){
     return 1;
@@ -197,13 +205,19 @@ string *performSingleRoundOperations(string* blocks, int numOfBlocks){
   return XORBlocks;
 }
 
+string performFinalRoundOperations(string* blocks, int numOfBlocks){
+  string* ESBlocks = performESOperation(blocks, numOfBlocks);
+  string result = calculateXORofAllBlocks(ESBlocks, numOfBlocks);
+  return result;
+}
+
 string getMTUHash(string hashInput){
   int numOfBlocks = getNumberOfBlocks(hashInput);
   string* blocks = partitionBlocks(hashInput, numOfBlocks);
   string result = "";
-  for(int i = 0; i < 16; i++){
+  for(int i = 0; i < 15; i++){
     blocks = performSingleRoundOperations(blocks, numOfBlocks);
   }
-  result = calculateXORofAllBlocks(blocks, numOfBlocks);
+  result = performFinalRoundOperations(blocks, numOfBlocks);
   return result;
 }
